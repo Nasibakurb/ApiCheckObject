@@ -1,0 +1,140 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+<H1>Требование</H1>
+
+<button type="button" asp-controller="Category" asp-action="CreateCategory" class="BtCreateOb">Добавить</button>
+<button type="button" asp-controller="Category" asp-action="EditCategory" class="BtEditOb">Изменить категорие</button>
+<button type="button" asp-controller="Home" asp-action="Index" class="BtCategory">Объекты</button>
+
+
+
+<table id="tableData">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Название</th>
+            <th>Подназвание</th>
+            <th>Boprogramm</th> 
+            <th>Создатель</th>
+            <th>Последние изменение</th>
+            <th>Дата создания</th>
+            <th>Дата изменение</th>
+            <th>Статус категории</th>
+            <th>Изменить статус</th>
+
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function getStatusNameById(statusId) {
+            switch (statusId) {
+                case 1:
+                    return "Активный";
+                case 2:
+                    return "Удаленный";
+                default:
+                    return "Неизвестный статус";
+            }
+        }
+        function getBoprogrammNameById(BoprogrammId) {
+            switch (BoprogrammId) {
+                case 1:
+                    return "Yes";
+                case 2:
+                    return "No";
+                default:
+                    return "Неизвестный статус";
+            }
+        }
+
+        $(document).ready(function () {
+            $.ajax({
+                url: '/api/miocategories',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    $('#tableData tbody').empty();
+                    $.each(data, function (index, item) {
+                        var row = $('<tr>');
+                        row.append($('<td>').text(item.id));
+                        row.append($('<td>').text(item.name));
+                        row.append($('<td>').text(item.subName));
+                        var BoprCell = $('<td>').text(getBoprogrammNameById(item.boprogramm));
+                        row.append(BoprCell);
+                        row.append($('<td>').text(item.created));
+                        row.append($('<td>').text(item.lastChange));
+                        row.append($('<td>').text(item.dateCreated));
+                        row.append($('<td>').text(item.dateChange));
+                        var statusCell = $('<td>').text(getStatusNameById(item.statusNameCategory));
+                        if (item.statusNameCategory == "1") {
+                            statusCell.addClass('active-status');
+                        } else {
+                            statusCell.addClass('notactive-status');
+                        }
+                        row.append(statusCell);
+
+                        var changeStatusCell = $('<td>');
+                        var changeStatusButton = $('<button>').text('Изменить статус');
+                        changeStatusButton.addClass('BtChangeStatus'); /*класс для стилей*/
+
+                        changeStatusButton.attr('data-id', item.id); /*добавляем Id для индефикс.*/
+
+                        changeStatusButton.on('click', function () {
+                            var objectId = $(this).attr('data-id');
+                            var dataToSend = {
+                                id: objectId
+                            };
+                            $.ajax({
+                                url: '/api/miocategories/' + objectId + '/change-status',
+                                type: 'PUT',
+                                contentType: 'application/json',
+                                data: JSON.stringify(dataToSend),
+                                success: function () {
+                                    location.reload();
+                                },
+                                error: function (xhr, status, error) {
+                                    $('#message').text('Ошибка при изменении статуса: ' + error);
+                                }
+                            });
+                        });
+
+                        changeStatusCell.append(changeStatusButton);
+                        row.append(changeStatusCell);
+
+                        $('#tableData tbody').append(row);
+                    });
+                    console.log(data)
+                },
+                error: function (xhr, status, error) {
+                    console.log(error);
+                }
+            });
+        });
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            $('.BtCreateOb').click(function () {
+                window.location.href = '/Category/CreateCategory';
+            });
+        });
+        $(document).ready(function () {
+            $('.BtEditOb').click(function () {
+                window.location.href = '/Category/EditCategory';
+            });
+        });
+        $(document).ready(function () {
+            $('.BtCategory').click(function () {
+                window.location.href = '/Home/Index';
+            });
+        });
+    </script>
+
+
+}

@@ -1,0 +1,118 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+<H1>Объекты КЖИ</H1>
+
+<button type="button" asp-controller="Home" asp-action="CreateObject" class="BtCreateOb">Добавить</button>
+<button type="button" asp-controller="Category" asp-action="Index" class="BtCategory">Требование</button>
+
+
+
+<table id="tableData">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Код объекта</th>
+            <th>Дата создания</th>
+            <th>Категория</th>
+            <th>Статус</th>
+            <th>Изменить статус</th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function getStatusNameById(statusId) {
+            switch (statusId) {
+                case 1:
+                    return "Активный";
+                case 2:
+                    return "Деактивированный";
+                default:
+                    return "Неизвестный статус";
+            }
+        }
+        $(document).ready(function () {
+            $.ajax({
+                url: '/api/objectsMio',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    $('#tableData tbody').empty();
+                    $.each(data, function (index, item) {
+                        var row = $('<tr>');
+                        row.append($('<td>').text(item.id));
+                        row.append($('<td>').text(item.codeObject));
+                        row.append($('<td>').text(item.createDate));
+                        row.append($('<td>').text(item.categoryId));
+
+                        var statusCell = $('<td>').text(getStatusNameById(item.statusName));
+                        if (item.statusName == "1") {
+                            statusCell.addClass('active-status');
+                        } else {
+                            statusCell.addClass('notactive-status');
+                        }
+                        row.append(statusCell);
+
+                        var changeStatusCell = $('<td>');
+                        var changeStatusButton = $('<button>').text('Изменить статус');
+                        changeStatusButton.addClass('BtChangeStatus'); /*класс для стилей*/
+
+                        changeStatusButton.attr('data-id', item.id); /*добавляем Id для индефикс.*/
+
+                        changeStatusButton.on('click', function () {
+                            var objectId = $(this).attr('data-id');
+                            var dataToSend = {
+                                id: objectId
+                            };
+                            $.ajax({
+                                url: '/api/objectsMio/' + objectId + '/change-status',
+                                type: 'PUT',
+                                contentType: 'application/json',
+                                data: JSON.stringify(dataToSend),
+                                success: function () {
+                                    location.reload();                                },
+                                error: function (xhr, status, error) {
+                                    $('#message').text('Ошибка при изменении статуса: ' + error);
+                                }
+                            });
+                        });
+
+                        changeStatusCell.append(changeStatusButton);
+                        row.append(changeStatusCell);
+
+                        $('#tableData tbody').append(row);
+                    });
+                    console.log(data)
+                },
+                error: function (xhr, status, error) {
+                    console.log(error);
+                }
+            });
+        });
+
+      
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            $('.BtCreateOb').click(function () {
+                window.location.href = '/Home/CreateObject';
+            });
+        });
+        $(document).ready(function () {
+            $('.BtEditOb').click(function () {
+                window.location.href = '/Home/EditObject';
+            });
+        });
+        $(document).ready(function () {
+            $('.BtCategory').click(function () {
+                window.location.href = '/Category/Index';
+            });
+        });
+    </script>
+}

@@ -1,0 +1,76 @@
+﻿@using ApiAppl.Domain.Enum;
+
+@{
+    ViewData["Title"] = "Edit object";
+}
+<H1>Изменение категорие</H1>
+
+<form id="editCategoryMIOForm">
+
+    <div class="form-group">
+        <label>ID:</label>
+        <input type="text" id="id" name="id" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label>Название:</label>
+        <input type="text" id="name" name="name" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label>Подкатегория:</label>
+        <input type="text" id="subName" name="subName" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label>Последние изменения:</label>
+        <input type="text" id="lastChange" name="lastChange" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label>BOPROGRAMM:</label>
+        <select name="boprogramm" id="boprogramm" class="form-select mb-3" asp-items="Html.GetEnumSelectList<Boprogramm>()"></select>
+    </div>
+    <br />
+    <br />
+    <button type="submit" class="btn btn-info">Изменить</button>
+    <button type="button" class="BtCategory">Категории</button>
+</form>
+
+
+<br />
+<div class="alert-danger" id="message"></div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#editCategoryMIOForm').submit(function (event) {
+            event.preventDefault();
+
+            var formData = {
+                id: $('#id').val(),
+                name: $('#name').val(),
+                subName: $('#subName').val(),
+                lastChange: $('#lastChange').val(),
+                boprogramm: parseInt($('#boprogramm').val()),
+            };
+
+            $.ajax({
+                url: '/api/miocategories/' + formData.id + '/change-category',
+                type: 'PUT',
+                dataType: 'json',
+                contentType: 'application/json',
+                data: JSON.stringify(formData),
+                success: function () {
+                    $('#message').text('Категория успешно изменен с Id: ' + formData.id);
+                },
+                error: function (xhr, status, error) {
+                    $('#message').text('Ошибка при изменении категория: ' + error);
+                }
+            });
+        });
+    });
+
+    $(document).ready(function () {
+        $('.BtCategory').click(function () {
+            window.location.href = '/Category/Index';
+        });
+    });
+</script>

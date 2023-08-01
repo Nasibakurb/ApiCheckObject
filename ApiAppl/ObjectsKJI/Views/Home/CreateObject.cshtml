@@ -1,0 +1,57 @@
+﻿@using ApiAppl.Domain.Enum;
+
+@{
+    ViewData["Title"] = "Create object";
+}
+<H1>Добавление объектов</H1>
+
+<form id="createMIOForm">
+
+    <div class="form-group">
+        <label>Код объекта:</label>
+        <input type="text" id="codeObject" name="codeObject" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label>Категортия:</label>
+        <input type="text" id="categoryId" name="categoryId" class="form-control" />
+    </div>
+    <br />
+    <button type="submit" class="btn btn-info">Создать</button>
+    <button type="button" asp-controller="Home" asp-action="Index" class="BtCategory">Объекты</button>
+</form>
+<br />
+<div class="alert-danger"  id="message"></div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#createMIOForm').submit(function (event) {
+            event.preventDefault();
+
+            var formData = {
+                codeObject: $('#codeObject').val(),
+                categoryId: $('#categoryId').val(),
+            };
+
+            $.ajax({
+                url: '/api/objectsMio/create-objectsMIOCheck',
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                data: JSON.stringify(formData),
+                success: function (data) {
+                    $('#message').text('Объект успешно создан с Id: ' + data.id);
+                },
+                error: function (xhr, status, error) {
+                    $('#message').text('Ошибка при создании объекта: ' + error);
+                }
+            });
+        });
+    });
+
+    $(document).ready(function () {
+        $('.BtCategory').click(function () {
+            window.location.href = '/Home/Index';
+        });
+    });
+</script>
